@@ -9,26 +9,30 @@ import os
 from utils import crop2patches
 
 
+DATA_PATH = 'D:\\Data\\datasets_ryan\\train\\'
+N_X, N_Y, N_Z = [128, 128, 5]
+CROPPED_PATH = 'D:\\Data\\datasets_ryan\\cropped\\'
+
+N_PHASES = 5
+N_ANGLES = 3
+
+
 def main():
     """
-    todo: fairsim third dimension: z0 5 phases 1 angle -> [5 5 5 5 5][5 5 5 5 5][5 5 5 5 5]
+        Go through raw data and ground truth folders in the given folder
+        crop all tiff images within these two folder two the given x, y, z
+        Please specify DATA_PATH, x, y, z, CROPPED_PATH, N_PHASES, N_ANGLES
     """
-    data_path = 'D:\\Data\\datasets_ryan\\test\\'
-    x, y, z = [128, 128, 5]
-    cropped_path = 'D:\\Data\\datasets_ryan\\cropped\\'
+    if not os.path.exists(CROPPED_PATH):
+        os.mkdir(CROPPED_PATH)
 
-    phases = 5
-    angles = 3
-    if not os.path.exists(cropped_path):
-        os.mkdir(cropped_path)
-    ns_channels = [phases * angles, 1]
-
-    folders = glob.glob(data_path + '*\\')
+    folders = glob.glob(DATA_PATH + '*\\')
     out_folders = dict()
     imgs_paths = dict()
     for folder in folders:
+        print(folder)
         folder_name = folder.split('\\')[-2]
-        out_folders[folder_name] = os.path.join(cropped_path, folder_name)
+        out_folders[folder_name] = os.path.join(CROPPED_PATH, folder_name)
 
         if not os.path.exists(out_folders[folder_name]):
             os.mkdir(out_folders[folder_name])
@@ -36,12 +40,14 @@ def main():
         imgs_paths[folder_name] = glob.glob(folder + '*.tif')
 
         scale = 2 if 'gt' in folder_name else 1
-        n_channels = 1 if 'gt' in folder_name else phases * angles
+        n_phases = 1 if 'gt' in folder_name else N_PHASES
+        n_angles = 1 if 'gt' in folder_name else N_ANGLES
 
         for img_path in imgs_paths[folder_name]:
-            patch_sizes = [z, x * scale, y * scale]
+            patch_sizes = [N_Z, N_X * scale, N_Y * scale]
 
-            crop2patches(img_path, out_folders[folder_name], patch_sizes, n_channels)
+            crop2patches(img_path, out_folders[folder_name], patch_sizes, n_phases, n_angles)
+
 
 if __name__ == '__main__':
     main()

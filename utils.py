@@ -5,26 +5,67 @@
     Author: Parisa Daj
     Date: 12 May, 2022
 """
-import glob
 import os
 import numpy as np
 import tifffile as tiff
 
 
-def crop2patches(in_path: str, out_path: str, patch_sizes: list, n_channels: int = 15):
+def reorder_1(img, phases=5, angles=3):
+    """
+        Change the z data order from angles, z, phases
+        to z, angles, phases
+    :param img:
+    :param phases:
+    :param angles:
+    :return:
+    """
+    [n_zs, n_x, n_y] = np.shape(img)
+    n_z = n_zs // (angles * phases)
+    five_d_img = np.reshape(img, (angles, n_z, phases, n_x, n_y))
+    # swap angles with z
+    new_img = five_d_img.swapaxes(1, 0)
+    return np.reshape(new_img, (n_zs, n_x, n_y))
+
+
+def reorder_2(img, phases=5, angles=3):
+    """
+        Change the z data order from z, angles, phases
+        to angles, z, phases
+    :param img:
+    :param phases:
+    :param angles:
+    :return:
+    """
+    [n_zs, n_x, n_y] = np.shape(img)
+    n_z = n_zs // (angles * phases)
+    five_d_img = np.reshape(img, (n_z, angles, phases, n_x, n_y))
+    # swap angles with z
+    new_img = five_d_img.swapaxes(1, 0)
+    return np.reshape(new_img, (n_zs, n_x, n_y))
+
+
+def crop2patches(in_path: str, out_path: str, patch_sizes: list,
+                 n_phases: int = 5, n_angles: int = 3):
     """
         Crop given image to 3D patches of given size
 
     :param in_path: path to read the image from (tiff format)
     :param out_path: path to save the cropped images to (tiff formet: same name + x, y, z ids)
     :param patch_sizes: a list of each patch size (integers) in order of z, x, y
-    :param n_channels: phases * angles
+    :param n_phases
+    :param n_angles
     :return:
 
     todo: separate last patch to have the most info from the original image
-    todo: number of patches can be independent of patch sizes
+    todo: number of patches can be independent of patch sizes!?!
     """
+    n_channels = n_phases * n_angles
     img = tiff.imread(in_path)
+
+    #  Change the z data order of the input data
+    if n_channels != 1:
+        img = reorder_1(img)
+
     img_name = in_path.split('\\')[-1].split('.tif')[0]
     if 'ER' in img_name:
         img_name = img_name.replace('ER', 'E')
@@ -52,18 +93,24 @@ def crop2patches(in_path: str, out_path: str, patch_sizes: list, n_channels: int
     # print(n_patches)
     # print(overlaps)
 
-    for z in range(n_patches[0]):
-        for x in range(n_patches[1]):
-            for y in range(n_patches[2]):
+    for k in range(n_patches[0]):
+        for i in range(n_patches[1]):
+            for j in range(n_patches[2]):
                 final_path = os.path.join(out_path,
                                           img_name + '_' +
-                                          str(x) + str(y) + str(z) + '.tiff')
+                                          str(i) + str(j) + str(k) + '.tiff')
+
                 if not os.path.exists(out_path):
                     os.mkdir(out_path)
 
-                new_img = img[(overlaps[0] * z) * n_channels:
-                              (overlaps[0] * z + patch_sizes[0]) * n_channels,
-                              overlaps[1] * x: overlaps[1] * x + patch_sizes[1],
-                              overlaps[2] * y: overlaps[2] * y + patch_sizes[2]]
-                with tiff.TiffWriter(final_path) as t:
-                    t.write(new_img)
+                new_img = img[(overlaps[0] * k) * n_channels:
+                              (overlaps[0] * k + patch_sizes[0]) * n_channels,
+                          overlaps[1] * i: overlaps[1] * i + patch_sizes[1],
+                          overlaps[2] * j: overlaps[2] * j + patch_sizes[2]]
+
+                # return the order of 3rd dimension to the original style
+                if n_channels != 1:
+                    new_img = reorder_2(new_img)
+
+                with tiff.TiffWriter(final_path) as tif:
+                    tif.write(new_img)
