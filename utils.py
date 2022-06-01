@@ -50,7 +50,7 @@ def crop2patches(in_path: str, out_path: str, patch_sizes: list,
         Crop given image to 3D patches of given size
 
     :param in_path: path to read the image from (tiff format)
-    :param out_path: path to save the cropped images to (tiff formet: same name + x, y, z ids)
+    :param out_path: path to save the cropped images to (tiff format: same name + x, y, z ids)
     :param patch_sizes: a list of each patch size (integers) in order of z, x, y
     :param n_phases
     :param n_angles
@@ -98,7 +98,7 @@ def crop2patches(in_path: str, out_path: str, patch_sizes: list,
             for j in range(n_patches[2]):
                 final_path = os.path.join(out_path,
                                           img_name + '_' +
-                                          str(i) + str(j) + str(k) + '.tiff')
+                                          str(i) + str(j) + str(k) + '.tif')
 
                 if not os.path.exists(out_path):
                     os.mkdir(out_path)

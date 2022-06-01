@@ -9,9 +9,9 @@ import os
 from utils import crop2patches
 
 
-DATA_PATH = 'D:\\Data\\datasets_ryan\\train\\'
-N_X, N_Y, N_Z = [128, 128, 5]
-CROPPED_PATH = 'D:\\Data\\datasets_ryan\\cropped\\'
+DATA_PATH = 'D:\\Data\\datasets_luhong\\train\\'
+N_X, N_Y, N_Z = [64, 64, 1]
+CROPPED_PATH = 'D:\\Data\\datasets_luhong\\cropped\\'
 
 N_PHASES = 5
 N_ANGLES = 3
