@@ -9,9 +9,9 @@ import os
 from utils import crop2patches
 
 
-DATA_PATH = 'D:\\Data\\datasets_luhong\\train\\'
-N_X, N_Y, N_Z = [64, 64, 1]
-CROPPED_PATH = 'D:\\Data\\datasets_luhong\\cropped\\'
+DATA_PATH = 'D:\\Data\\FixedCell\\PFA_eGFP\\data\\'
+N_X, N_Y, N_Z = [128, 128, 1]
+CROPPED_PATH = 'D:\\Data\\FixedCell\\PFA_eGFP\\cropped2d\\'
 
 N_PHASES = 5
 N_ANGLES = 3
@@ -20,8 +20,11 @@ N_ANGLES = 3
 def main():
     """
         Go through raw data and ground truth folders in the given folder
-        crop all tiff images within these two folder two the given x, y, z
+        crop all tiff images within these two folder to the given x, y, z
         Please specify DATA_PATH, x, y, z, CROPPED_PATH, N_PHASES, N_ANGLES
+        in the DATA_PATH folder there have to be two subfolders:
+        1. the raw data folder with any given name (the name should not include "gt")
+        2. the ground truth folder with any given name followed by "gt"
     """
     if not os.path.exists(CROPPED_PATH):
         os.mkdir(CROPPED_PATH)
